@@ -7,51 +7,40 @@
       href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
       rel="stylesheet"
     />
+    <link
+      href="https://use.fontawesome.com/releases/v5.6.1/css/all.css"
+      rel="stylesheet"
+    />
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.min.js"></script>
     <title>CropImages</title>
   </head>
   <body class="text-center">
-    <header class="h-16">
+    <header class="h-12">
       <h1 class="py-6 text-xl font-semibold">Crop Image Application</h1>
     </header>
-    <main class="mt-16" id="app">
+    <main class="mt-12" id="app">
       <div>
         <label
-          class="button p-8 border-2 border-indigo-600 cursor-pointer shadow-lg text-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white"
+          class="button p-6 border-2 border-indigo-600 cursor-pointer shadow-lg text-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white"
         >
-          <span class="text-xl p-16">Select Files</span>
+          <span class="text-xl p-10">Select Files</span>
           <input
             type="file"
             class="hidden"
             ref="preview"
             @change="uploadFile"
+            multiple
           />
         </label>
-        <!-- <input type="file" ref="preview" @change="uploadFile" /> -->
       </div>
-      <div v-if="url">
-        <div style="position: absolute" @click="deletePreview">選択削除</div>
-        <img :src="url" />
+      <div v-if="images" class="flex mt-10 w-full">
+        <div v-for="(image, index) in images" :key="index">
+          <div class="absolute text-white" @click="deletePreview(index)">
+            <i class="fas fa-minus-circle text-xl pl-2 pt-2 shadow-lg"></i>
+          </div>
+          <img :src="images[index]" class="w-4/12" />
+        </div>
       </div>
-      <!-- vuejs -->
-      <div class="p-16">
-        <input
-          type="file"
-          name="images"
-          accept="images/*"
-          @click="changeBase64"
-        />
-      </div>
-      <div class="preview-images">
-        <li v-for="(image1, index) in images" :key="index" class="">
-          <img src="image1" alt="" style="width: 50%; height: auto" />
-          <label for="">
-            <button type="button" @click="removeImage(index)">削除</button>
-          </label>
-        </li>
-        <canvas ref="canvas" class="hidden"></canvas>
-      </div>
-      <!-- <input type="file" /> -->
     </main>
   </body>
 </html>
@@ -62,74 +51,16 @@
     data: {
       message: "Try Preview!",
       images: [],
-      url: "",
     },
     methods: {
       uploadFile() {
-        const file = this.$refs.preview.files[0];
-        this.url = URL.createObjectURL(file);
-      },
-      deletePreview() {
-        this.url = "";
-        URL.revokeObjectURL(this.url);
-        this.$refs.preview.value = "";
-      },
-      changeBase64(e) {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          this.generateImageUrl(e.target.result);
-        };
-        reader.readAsDataUrl(file);
-      },
-      generateImgUrl(file) {
-        const image = new Image();
-        image.crossOrigin = "Anonymous";
-        image.onload = (e) => {
-          const resizedBase64 = this.makeResizeImg(image);
-          this.images.push(resizedBase64);
-        };
-        image.src = file;
-      },
-      makeResizeImg(image) {
-        const canvas = this.$refs.canvas;
-        const ctx = canvas.getContext("2d"); // 2Dコンテキスト
-        // 縦横で長い方の最大値を1000とする
-        const MAX_SIZE = 1000;
-        // MAX_SIZEよりも小さかったらそのまま
-        if (image.width < MAX_SIZE && image.height < MAX_SIZE) {
-          [canvas.width, canvas.height] = [image.width, image.height];
-          ctx.drawImage(image, 0, 0);
-          return canvas.toDataURL("image/jpeg");
+        console.log(this.$refs.preview.files.length);
+        for (let i = 0; i < this.$refs.preview.files.length; i++) {
+          const file = this.$refs.preview.files[i];
+          this.images.push(URL.createObjectURL(file));
         }
-        let dstWidth;
-        let dstHeight;
-        // 縦横比の計算
-        if (image.width > image.height) {
-          dstWidth = MAX_SIZE;
-          dstHeight = (image.height * MAX_SIZE) / image.width;
-        } else {
-          dstHeight = MAX_SIZE;
-          dstWidth = (image.width * MAX_SIZE) / image.height;
-        }
-        canvas.width = dstWidth;
-        canvas.height = dstHeight;
-        // リサイズ
-        ctx.drawImage(
-          image,
-          0,
-          0,
-          image.width,
-          image.height,
-          0,
-          0,
-          dstWidth,
-          dstHeight
-        );
-        // data_url形式に変換したものを返す
-        return canvas.toDataURL("image/jpeg");
       },
-      removeImage(index) {
+      deletePreview(index) {
         this.$delete(this.images, index);
       },
     },
