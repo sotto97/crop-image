@@ -23,7 +23,7 @@
         <label
           class="button py-4 px-6 border-2 border-indigo-600 cursor-pointer shadow-lg text-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white"
         >
-          <span class="text-xl">Select Files</span>
+          <span>トリミングするイメージを選択</span>
           <input
             type="file"
             class="hidden"
@@ -34,7 +34,7 @@
         </label>
       </div>
       <h1 class="my-6 text-xl font-semibold">トリミングするイメージ</h1>
-      <div v-if="images" class="flex mt-10 w-full">
+      <div v-if="images" class="flex mb-5 w-full">
         <div v-for="(image, index) in images" :key="index" class="w-full">
           <div class="absolute text-white" @click="deletePreview(index)">
             <i class="fas fa-minus-circle text-xl pl-2 pt-2 shadow-lg"></i>
@@ -43,11 +43,12 @@
         </div>
       </div>
       <button
-        class="button mt-10 py-4 px-6 border-2 border-green-600 cursor-pointer shadow-lg text-green-600 rounded-lg hover:bg-green-600 hover:text-white"
+        class="button py-4 px-6 border-2 border-green-600 cursor-pointer shadow-lg text-green-600 rounded-lg hover:bg-green-600 hover:text-white"
         @click="cropImage"
       >
         トリミングを実行
       </button>
+      <p class="mt-2 text-md text-red-500">{{ message }}</p>
     </main>
   </body>
 </html>
@@ -56,7 +57,7 @@
   new Vue({
     el: "#app",
     data: {
-      message: "Try Preview!",
+      message: "",
       images: [],
     },
     methods: {
@@ -71,7 +72,11 @@
         this.$delete(this.images, index);
       },
       cropImage() {
-        console.log(this.images);
+        if (this.images.length === 0) {
+          this.message = "※画像を選択してください";
+        } else {
+          console.log(this.images);
+        }
       },
     },
   });
